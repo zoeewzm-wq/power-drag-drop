@@ -336,7 +336,6 @@ export class ItemRenderer {
             itemRow.style.fontFamily = parameters.ItemFont.raw;
         }
     }
-    
     private renderHTMLTemplate(
         itemRow: HTMLElement,
         item: ComponentFramework.PropertyHelper.DataSetApi.EntityRecord,
