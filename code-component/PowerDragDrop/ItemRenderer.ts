@@ -348,8 +348,20 @@ export class ItemRenderer {
         try {
             const itemData = GetOutputObjectRecord(item, fieldsOnDataset);
             const result = template(itemData);
-            // Sanitize so we can't include scripts etc.
             const sanitizedResult = sanitize(result, SanitizeHtmlOptions);
+
+            innerDiv.setAttribute('data-pcf-test', 'base64-v3');
+
+            innerDiv.setAttribute(
+            'data-before-sanitize',
+            result.includes('data:image/') ? 'yes' : 'no'
+            );
+
+            innerDiv.setAttribute(
+               'data-after-sanitize',
+            sanitizedResult.includes('data:image/') ? 'yes' : 'no'
+            );
+
             innerDiv.innerHTML = sanitizedResult;
             itemRow.appendChild(innerDiv);
             return true;
