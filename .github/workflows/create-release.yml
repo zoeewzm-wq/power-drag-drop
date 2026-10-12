@@ -67,36 +67,13 @@ jobs:
       - run: dotnet build -c release
         working-directory: "./solution"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload PowerDragDrop ZIP
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ steps.get_version.outputs.version_tag }}
-          release_name: Release ${{ steps.get_version.outputs.version_tag }}
-          draft: true
-          prerelease: true
-
-      - name: Upload Release Asset
-        id: upload-release-asset1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Solution/bin/Release/Solution.zip
-          asset_name: PowerDragDrop_unmanaged_${{ steps.get_version.outputs.major }}_${{ steps.get_version.outputs.minor }}_${{ steps.get_version.outputs.patch }}.zip
-          draft: false.zip
-          asset_content_type: application/zip
-
-      - name: Upload Release Asset
-        id: upload-release-asset2
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Solution/bin/Release/Solution_managed.zip
-          asset_name: PowerDragDrop_managed_${{ steps.get_version.outputs.major }}_${{ steps.get_version.outputs.minor }}_${{ steps.get_version.outputs.patch }}.zip
-          asset_content_type: application/zip
+          name: PowerDragDrop-Solution
+          path: |
+            solution/bin/Release/Solution.zip
+            solution/bin/Release/Solution_managed.zip
+          if-no-files-found: error
+          retention-days: 7
