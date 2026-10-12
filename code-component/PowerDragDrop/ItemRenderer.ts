@@ -345,20 +345,34 @@ export class ItemRenderer {
     ): boolean {
         // Mustache caches templates - so we don't need to pre-cache
         const innerDiv = document.createElement('div');
+        
         try {
             const itemData = GetOutputObjectRecord(item, fieldsOnDataset);
+
             const result = template(itemData);
             const sanitizedResult = sanitize(result, SanitizeHtmlOptions);
 
+            // Diagnostic: identify the loaded PCF version
             innerDiv.setAttribute('data-pcf-test', 'base64-v3');
-            innerDiv.setAttribute('data-before-sanitize',
-            result.includes('data:image/')?'yes':'no');
-            innerDiv.setAttribute('data-after-sanitize',
-            sanitizedResult.includes('data:image/')?'yes':'no');
+
+            // Diagnostic: check HTML before sanitization
+            innerDiv.setAttribute(
+                'data-before-sanitize',
+                result.includes('data:image/') ? 'yes' : 'no',
+            );
+
+            // Diagnostic: check HTML after sanitization
+            innerDiv.setAttribute(
+                'data-after-sanitize',
+                sanitizedResult.includes('data:image/') ? 'yes' : 'no',
+            );
+
             innerDiv.innerHTML = sanitizedResult;
             itemRow.appendChild(innerDiv);
+
             return true;
-        } catch (e) {
+        }
+ catch (e) {
             itemRow.appendChild(this.createMessageElement(`Template Error:<br>${escape(JSON.stringify(e))}`));
             return false;
         }
