@@ -22,8 +22,8 @@ jobs:
         run: |
           $buildNumber = 10000 + [int]$env:GITHUB_RUN_NUMBER
 
-          $pcfVersion = "1.0.$buildNumber"
-          $solutionVersion = "1.0.$buildNumber.0"
+          $pcfVersion = "1.1.$buildNumber"
+          $solutionVersion = "1.1.$buildNumber.0"
 
           # Update PCF manifest
           $manifestPath = "code-component/PowerDragDrop/ControlManifest.Input.xml"
