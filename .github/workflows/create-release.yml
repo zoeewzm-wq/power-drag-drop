@@ -20,7 +20,7 @@ jobs:
       - name: Auto Increment PCF Version
         shell: pwsh
         run: |
-          $buildNumber = 1000 + [int]$env:GITHUB_RUN_NUMBER
+          $buildNumber = 10000 + [int]$env:GITHUB_RUN_NUMBER
 
           $pcfVersion = "1.0.$buildNumber"
           $solutionVersion = "1.0.$buildNumber.0"
