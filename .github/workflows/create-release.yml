@@ -7,6 +7,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+
 jobs:
   build:
     runs-on: windows-latest
@@ -14,48 +15,37 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      # Automatisch PCF- en Solution-versies verhogen
+      - name: Auto Increment PCF Version
+        shell: pwsh
+        run: |
+          $buildNumber = 1000 + [int]$env:GITHUB_RUN_NUMBER
+
+          $pcfVersion = "1.0.$buildNumber"
+          $solutionVersion = "1.0.$buildNumber.0"
+
+          # Update PCF manifest
+          $manifestPath = "code-component/PowerDragDrop/ControlManifest.Input.xml"
+          [xml]$manifest = Get-Content -Raw $manifestPath
+          $manifest.SelectSingleNode('/manifest/control').SetAttribute('version', $pcfVersion)
+          $manifest.Save((Join-Path $env:GITHUB_WORKSPACE $manifestPath))
+
+          # Update Solution version
+          $solutionPath = "solution/src/Other/Solution.xml"
+          [xml]$solution = Get-Content -Raw $solutionPath
+          $solution.SelectSingleNode('/ImportExportXml/SolutionManifest/Version').InnerText = $solutionVersion
+          $solution.Save((Join-Path $env:GITHUB_WORKSPACE $solutionPath))
+
+          Write-Host "PCF version: $pcfVersion"
+          Write-Host "Solution version: $solutionVersion"
+
       - uses: actions/setup-node@v3.6.0
         with:
           node-version: "14.x"
 
       - run: npm ci
         working-directory: "./build-scripts"
-      
-      - name: Get Next Semantic Version
-        id: get_version
-        uses: paulhatch/semantic-version@v5.0.0-beta
-        with:
-          # The prefix to use to identify tags
-          tag_prefix: "v"
-          # A string which, if present in a git commit, indicates that a change represents a
-          # major (breaking) change, supports regular expressions wrapped with '/'
-          major_pattern: "(MAJOR)"
-          # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
-          minor_pattern: "(MINOR)"
-          # A string to determine the format of the version output
-          version_format: "${major}.${minor}.${patch}-prerelease${increment}"
-          # If this is set to true, *every* commit will be treated as a new version.
-          bump_each_commit: false
-          # If true, the body of commits will also be searched for major/minor patterns to determine the version type.
-          search_commit_body: false
-          # The output method used to generate list of users, 'csv' or 'json'.
-          user_format_type: "csv"
-
-      - name: Version Stamp Code Components
-        uses: actions/github-script@v2
-        with:
-          script: |
-            const version = require(`${process.env.GITHUB_WORKSPACE}/build-scripts/version-stamp.js`)
-            version({
-              majorVersion: ${{ steps.get_version.outputs.major }},
-              minorVersion: ${{ steps.get_version.outputs.minor }},
-              buildVersion: ${{ steps.get_version.outputs.patch }},
-              manifestsPaths: [
-                `${process.env.GITHUB_WORKSPACE}/code-component/PowerDragDrop`
-                ],
-              solutionPaths: `${process.env.GITHUB_WORKSPACE}/Solution/src/Other/Solution.xml`,
-              beta: false}
-              )
 
       - run: npm ci
         working-directory: "./code-component"
